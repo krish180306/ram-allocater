@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Diagram - Docker OS Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- vis.js network diagram -->
+  <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/dist/vis-network.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1>🌐 Network Diagram</h1>
+    <nav>
+      <a href="index.html">🏠 Home</a>
+      <a href="processes.html">⚙️ Processes</a>
+      <a href="scheduler.html">⚡ Scheduler</a>
+      <a href="network.html">🌐 Network</a>
+      <a href="about.html">ℹ️ About</a>
+      <button id="theme-toggle">🌙 Dark Mode</button>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>🌐 Container Network Map</h2>
+      <p class="section-desc">
+        Interactive diagram showing Docker networks and which containers are connected to each.
+        Demonstrates OS <strong>namespace isolation</strong> — each container has its own network namespace.
+        Drag nodes to explore. Auto-refreshes every 10s.
+      </p>
+      <div id="network-graph"></div>
+      <div id="net-legend" class="net-legend"></div>
+      <div id="net-info" style="margin-top:1rem;font-size:0.85rem;color:#64748b;"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Docker OS Project | All Rights Reserved</p>
+  </footer>
+
+  <script>
+    // ── Theme ──────────────────────────────────────────────────────────────
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+      drawGraph(lastData); // redraw with updated theme
+    });
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggleBtn.textContent = '☀️ Light Mode';
+    }
+
+    const NETWORK_COLORS = [
+      '#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'
+    ];
+
+    let network = null;
+    let lastData = null;
+
+    function drawGraph(data) {
+      if (!data) return;
+      lastData = data;
+
+      const isDark = document.body.classList.contains('dark-mode');
+      const nodeFont = isDark ? '#e2e8f0' : '#1a202c';
+      const edgeColor = isDark ? '#4b5563' : '#cbd5e1';
+      const bgColor   = isDark ? '#12151f' : '#f0f4f8';
+
+      // Update graph background
+      document.getElementById('network-graph').style.background = bgColor;
+
+      const nodes = [];
+      const edges = [];
+      const usedContainers = new Set();
+
+      const legend = document.getElementById('net-legend');
+      legend.innerHTML = '';
+
+      data.networks.forEach((net, ni) => {
+        const color = NETWORK_COLORS[ni % NETWORK_COLORS.length];
+
+        // Add a network node
+        const netNodeId = `net-${net.id}`;
+        nodes.push({
+          id: netNodeId,
+          label: `🔗 ${net.name}\n(${net.driver})`,
+          shape: 'ellipse',
+          color: { background: color, border: color },
+          font: { color: 'white', size: 13, bold: true },
+          size: 30
+        });
+
+        // Legend
+        legend.innerHTML += `
+          <div class="net-legend-item">
+            <div class="net-legend-dot" style="background:${color}"></div>
+            <span>${net.name} (${net.driver})</span>
+          </div>`;
+
+        // Add container nodes and edges
+        net.containers.forEach(c => {
+          const cNodeId = `ctr-${c.name}`;
+          if (!usedContainers.has(c.name)) {
+            const cInfo = data.containerMap[c.name] || {};
+            const statusEmoji = cInfo.status === 'running' ? '🟢' : '🔴';
+            nodes.push({
+              id: cNodeId,
+              label: `${statusEmoji} ${c.name}\n${c.ipv4 || ''}`,
+              shape: 'box',
+              color: {
+                background: isDark ? '#1a1d2e' : '#ffffff',
+                border: color,
+                highlight: { background: isDark ? '#2d3152' : '#eef2ff', border: color }
+              },
+              font: { color: nodeFont, size: 12 },
+              borderWidth: 2
+            });
+            usedContainers.add(c.name);
+          }
+          edges.push({
+            from: netNodeId,
+            to: cNodeId,
+            color: { color: edgeColor, highlight: color },
+            smooth: { type: 'dynamic' }
+          });
+        });
+      });
+
+      const visNodes = new vis.DataSet(nodes);
+      const visEdges = new vis.DataSet(edges);
+
+      const container = document.getElementById('network-graph');
+      const options = {
+        physics: {
+          enabled: true,
+          stabilization: { iterations: 100 },
+          barnesHut: { gravitationalConstant: -5000, springLength: 120 }
+        },
+        interaction: { dragNodes: true, zoomView: true, hover: true },
+        layout: { improvedLayout: true }
+      };
+
+      if (network) {
+        network.setData({ nodes: visNodes, edges: visEdges });
+        network.setOptions(options);
+      } else {
+        network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
+        network.on('selectNode', params => {
+          if (params.nodes.length > 0) {
+            const id = params.nodes[0];
+            const node = nodes.find(n => n.id === id);
+            if (node) {
+              document.getElementById('net-info').textContent = `Selected: ${node.label.replace('\n', ' — ')}`;
+            }
+          }
+        });
+      }
+    }
+
+    async function fetchAndDraw() {
+      try {
+        const res = await fetch('/api/network');
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        drawGraph(data);
+      } catch (e) {
+        const el = document.getElementById('network-graph');
+        if (!network) {
+          el.innerHTML = '<div class="loader-center">Could not load network data. Is the API running?</div>';
+        }
+      }
+    }
+
+    fetchAndDraw();
+    setInterval(fetchAndDraw, 10000);
+  </script>
+</body>
+
+</html>

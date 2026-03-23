@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Service 1: Frontend (Nginx)
+  frontend:
+    build: .
+    ports:
+      - "8082:80"
+    mem_limit: 128m          # Hard cap — container can't exceed 128 MB
+    memswap_limit: 128m      # Disable swap (RAM only)
+    mem_reservation: 64m     # Soft guarantee (minimum reserved)
+    depends_on:
+      - api
+
+  # Service 2: Backend API (Node.js)
+  api:
+    build: ./api
+    mem_limit: 256m
+    memswap_limit: 256m
+    mem_reservation: 128m
+    depends_on:
+      - database
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # For Docker API access
+
+  # Service 3: Database (Redis)
+  database:
+    image: redis:alpine
+    mem_limit: 64m
+    memswap_limit: 64m
+    mem_reservation: 32m

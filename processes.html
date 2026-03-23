@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Monitor - Docker OS Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>⚙️ Process Monitor</h1>
+    <nav>
+      <a href="index.html">🏠 Home</a>
+      <a href="processes.html">⚙️ Processes</a>
+      <a href="scheduler.html">⚡ Scheduler</a>
+      <a href="network.html">🌐 Network</a>
+      <a href="about.html">ℹ️ About</a>
+      <button id="theme-toggle">🌙 Dark Mode</button>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>⚙️ Process Management</h2>
+      <p class="section-desc">Live process monitoring via /proc filesystem — top 25 by CPU usage · auto-refreshes every 5s</p>
+
+      <div class="action-bar">
+        <button class="refresh-btn" onclick="updateProcesses()">🔄 Refresh Now</button>
+        <button class="stress-btn" id="stress-btn" onclick="runStressTest()">🔥 Stress Test (CPU Spike)</button>
+      </div>
+
+      <div id="process-container">
+        <div class="loader-center">Loading processes…</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Docker OS Project | All Rights Reserved</p>
+  </footer>
+
+  <script>
+    // ── Theme ──────────────────────────────────────────────────────────────
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      themeToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeToggleBtn.textContent = '☀️ Light Mode';
+    }
+
+    // ── Toast ──────────────────────────────────────────────────────────────
+    function showToast(msg, type = '') {
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3100);
+    }
+
+    // ── Stress Test ────────────────────────────────────────────────────────
+    async function runStressTest() {
+      const btn = document.getElementById('stress-btn');
+      btn.disabled = true;
+      btn.textContent = '🔥 Running…';
+      try {
+        const res = await fetch('/api/stress', { method: 'POST' });
+        const data = await res.json();
+        showToast(data.message || 'Stress test started', 'success');
+      } catch (e) {
+        showToast('Stress test failed: ' + e.message, 'error');
+      }
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '🔥 Stress Test (CPU Spike)';
+      }, 12000);
+    }
+
+    // ── Kill Process ───────────────────────────────────────────────────────
+    window.killProcess = async function(pid, command) {
+      if (!confirm(`Kill PID ${pid}?\n${command}`)) return;
+      try {
+        const res = await fetch('/api/processes/kill', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pid })
+        });
+        const data = await res.json();
+        showToast(data.success ? `PID ${pid} killed ✓` : data.error, data.success ? 'success' : 'error');
+        if (data.success) setTimeout(updateProcesses, 800);
+      } catch (e) {
+        showToast('Kill failed: ' + e.message, 'error');
+      }
+    };
+
+    // ── Process List ───────────────────────────────────────────────────────
+    async function updateProcesses() {
+      const container = document.getElementById('process-container');
+      try {
+        const res = await fetch('/api/processes');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+
+        if (data.processes && data.processes.length > 0) {
+          let html = '<div style="overflow-x:auto"><table class="process-table">';
+          html += '<thead><tr>';
+          html += '<th>PID</th><th>User</th><th>CPU%</th><th>MEM%</th>';
+          html += '<th>VSZ (KB)</th><th>RSS (KB)</th><th>State</th><th>Command</th><th>Action</th>';
+          html += '</tr></thead><tbody>';
+
+          data.processes.forEach(p => {
+            const cpuVal = parseFloat(p.cpu);
+            const cpuClass = cpuVal > 50 ? 'cpu-high' : cpuVal > 10 ? 'cpu-medium' : 'cpu-low';
+            const shortCmd = p.command.length > 35 ? p.command.substring(0, 35) + '…' : p.command;
+            html += `<tr>
+              <td><strong>${p.pid}</strong></td>
+              <td>${p.user}</td>
+              <td class="${cpuClass}">${p.cpu}%</td>
+              <td>${p.mem}%</td>
+              <td>${parseInt(p.vsz).toLocaleString()}</td>
+              <td>${parseInt(p.rss).toLocaleString()}</td>
+              <td><code>${p.stat}</code></td>
+              <td title="${p.command}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${shortCmd}</td>
+              <td><button class="btn-kill" onclick="killProcess('${p.pid}','${p.command.replace(/'/g,"\\'")}')">⚡ Kill</button></td>
+            </tr>`;
+          });
+
+          html += '</tbody></table></div>';
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = '<div class="loader-center">No processes found</div>';
+        }
+      } catch (err) {
+        if (!container.querySelector('table')) {
+          container.innerHTML = '<div class="loader-center">Error loading processes — is the API running?</div>';
+        }
+      }
+    }
+
+    updateProcesses();
+    setInterval(updateProcesses, 5000);
+  </script>
+</body>
+
+</html>

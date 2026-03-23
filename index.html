@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker OS Project - Dashboard</title>
+  <meta name="description" content="Docker container resource monitor dashboard demonstrating OS concepts">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js for rolling graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script defer src="script.js"></script>
+  <script defer src="container-stats.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>🐳 Docker OS Project</h1>
+    <nav>
+      <a href="index.html">🏠 Home</a>
+      <a href="processes.html">⚙️ Processes</a>
+      <a href="scheduler.html">⚡ Scheduler</a>
+      <a href="network.html">🌐 Network</a>
+      <a href="about.html">ℹ️ About</a>
+      <button id="theme-toggle">🌙 Dark Mode</button>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>🏠 Welcome</h2>
+      <p>This site runs on <strong>Nginx inside a Docker container</strong>, demonstrating real-time OS concepts including
+        process management, resource isolation via <strong>cgroups</strong>, and CPU scheduling algorithms.</p>
+      <p id="clock" style="font-size:1rem;"></p>
+    </section>
+
+    <section>
+      <h2>👥 Team Members</h2>
+      <ul>
+        <li><strong>Rakshitha R</strong> — 24BCE1070</li>
+        <li><strong>Dittya D</strong> — 24BCE5045</li>
+        <li><strong>P Sai Krishna</strong> — 24BCE5232</li>
+      </ul>
+      <p><strong>Visitor Count:</strong> <span id="visits">—</span></p>
+    </section>
+
+    <section id="container-stats">
+      <h2>🐳 Container Resource Monitor</h2>
+      <p class="section-desc">Real-time stats via Docker API &amp; Linux cgroups — updates every 3s</p>
+      <div id="container-cards" class="container-grid">
+        <div class="loader-center">Loading container stats…</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Docker OS Project | All Rights Reserved</p>
+  </footer>
+</body>
+
+</html>
