@@ -1,168 +1,176 @@
-# Docker OS Project - Container & Process Management System
+# 🐳 Docker OS Project: Container & Process Management System
 
-## 🎯 Project Overview
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 
-This project demonstrates core **Operating System concepts** using Docker containerization, including process management, resource monitoring, and CPU scheduling algorithms. It showcases the intersection of OS theory and modern container technology.
+A comprehensive educational project demonstrating core **Operating System concepts** through the lens of modern Docker containerization. It features real-time container resource monitoring, actual OS process tracking via `/proc`, and an interactive CPU scheduler simulator.
 
-## 🚀 Features
+---
 
-### 1. **Container Resource Monitor** 🐳
-- Real-time CPU and memory usage tracking
-- Process count per container
-- Live updates using Docker API
-- **OS Concepts**: Linux cgroups, resource isolation, containerization
+## 🎯 Key Features
 
-### 2. **Process Management Dashboard** ⚙️
-- Live process monitoring from `/proc` filesystem
-- CPU and memory usage per process
-- Process states (running, sleeping, zombie)
-- **OS Concepts**: Process management, /proc filesystem, system monitoring
+### 1. 🐳 Container Resource Monitor
+- **Real-time Metrics:** Tracks CPU, memory usage, and process count per container.
+- **Docker API Integration:** Live updates fetched directly via the Docker Engine API.
+- **OS Concepts:** Linux cgroups, resource isolation, namespace separation.
 
-### 3. **CPU Scheduler Simulator** ⚡
-- Interactive visualization of scheduling algorithms:
+### 2. ⚙️ Process Management Dashboard
+- **Live Process Tracking:** Parses the Linux `/proc` filesystem to monitor host and containerized processes.
+- **Detailed Insights:** Displays CPU/memory utilization per process and process states (running, sleeping, zombie).
+- **OS Concepts:** Process lifecycle management, `/proc` virtual filesystem, system monitoring.
+
+### 3. ⚡ CPU Scheduler Simulator
+- **Interactive Visualization:** Dynamic simulation of standard CPU scheduling algorithms.
+- **Supported Algorithms:** 
   - **FCFS** (First Come First Serve)
-  - **Round Robin** (with configurable time quantum)
   - **SJF** (Shortest Job First)
-- Gantt chart visualization
-- Performance metrics (waiting time, turnaround time)
-- **OS Concepts**: CPU scheduling, process states, context switching
+  - **Round Robin** (with configurable time quantum)
+- **Performance Evaluation:** Computes and graphs waiting time, turnaround time, and throughput via Gantt charts.
+- **OS Concepts:** CPU scheduling algorithms, context switching, preemption.
 
-## 📊 Architecture
+### 4. 🎨 Modern UI/UX
+- Responsive dashboard design with Dark/Light mode support.
+- Configurable auto-refresh mechanisms (e.g., every 3-5 seconds).
 
-```
+---
+
+## 📊 System Architecture
+
+The application is built using a microservices architecture orchestrated by Docker Compose:
+
+```text
 ┌─────────────────────────────────────────────────┐
 │              User Browser                       │
 └────────────┬────────────────────────────────────┘
-             │
+             │ HTTP / REST
              ▼
 ┌─────────────────────────────────────────────────┐
 │         Nginx Container (Frontend)              │
-│  - Static files (HTML/CSS/JS)                   │
-│  - Reverse proxy to API                         │
-│  - Security headers (CSP, X-Frame-Options)      │
+│  - Serves static files (HTML/CSS/JS)            │
+│  - Reverse proxy to Node.js backend (`/api/*`)  │
+│  - Implements Security Headers                  │
 └────────────┬────────────────────────────────────┘
-             │
+             │ Port 80
              ▼
 ┌─────────────────────────────────────────────────┐
-│         Node.js API Container                   │
-│  - /api/containers/stats (Docker API)           │
-│  - /api/processes (/proc filesystem)            │
-│  - /api/visit (Redis counter)                   │
+│         Node.js API Container (Backend)         │
+│  - /api/containers/stats (via Dockerode)        │
+│  - /api/processes (Reads /proc metrics)         │
+│  - /api/visit (Hit counter logic)               │
 └────────────┬────────────────────────────────────┘
-             │
+             │ Port 6379
              ▼
 ┌─────────────────────────────────────────────────┐
 │         Redis Container (Database)              │
-│  - Visitor count persistence                    │
+│  - Ephemeral & fast visitor persistence         │
 └─────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Technologies Used
+---
 
-- **Docker & Docker Compose** - Container orchestration
-- **Nginx** - Web server and reverse proxy
-- **Node.js & Express** - Backend API
-- **Redis** - Data persistence
-- **Dockerode** - Docker Engine API client
-- **Linux /proc** - Process information
+## 📂 Project Structure
 
-## 📦 Installation & Setup
+```text
+myweb/
+├── api/
+│   ├── Dockerfile           # Backend container build instructions
+│   ├── package.json         # Node.js dependencies
+│   └── server.js            # Express server & Docker/Redis API abstractions
+├── docker-compose.yml       # Multi-container orchestration logic
+├── Dockerfile               # Frontend (Nginx) container build instructions
+├── default.conf             # Nginx server configuration
+├── index.html               # Main Dashboard UI
+├── processes.html           # Process Management UI
+├── scheduler.html           # CPU Scheduler Simulator UI
+├── network.html             # Network simulation page
+├── about.html               # About Project page
+├── style.css                # Global styles and Dark Theme
+├── script.js                # Frontend UX interactions 
+├── container-stats.js       # Live metrics retrieval and processing logic
+└── README.md                # Project documentation
+```
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Backend:** Node.js, Express.js, Dockerode
+- **Database:** Redis (Alpine)
+- **Web Server:** Nginx
+- **Containerization:** Docker, Docker Compose
+
+---
+
+## 📦 Getting Started
 
 ### Prerequisites
-- Docker Desktop installed
-- Docker Compose installed
 
-### Steps
+Ensure you have the following installed on your host machine:
+- [Docker Engine](https://docs.docker.com/engine/install/) / Docker Desktop
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-1. **Clone the repository**
+### Installation & Execution
+
+1. **Clone the repository and navigate to the project directory:**
    ```bash
-   cd docker_project/myweb
+   cd path/to/docker_project/myweb
    ```
 
-2. **Build and start containers**
+2. **Build and spin up the Docker containers:**
    ```bash
    docker-compose up --build -d
    ```
+   *Note: Containers are inherently configured with strict memory limits (e.g., Nginx: 128MB, API: 256MB) to simulate low-resource environments and study constraint behavior.*
 
-3. **Access the application**
-   - Main Dashboard: http://localhost:8082
-   - Process Monitor: http://localhost:8082/processes.html
-   - CPU Scheduler: http://localhost:8082/scheduler.html
+3. **Access the Application:**
+   Open your preferred browser and navigate to the following endpoints:
+   - **Main Dashboard:** [http://localhost:8082](http://localhost:8082)
+   - **Process Monitor:** [http://localhost:8082/processes.html](http://localhost:8082/processes.html)
+   - **CPU Scheduler:** [http://localhost:8082/scheduler.html](http://localhost:8082/scheduler.html)
 
-4. **Stop containers**
+4. **Monitoring logs (Optional):**
+   ```bash
+   docker-compose logs -f
+   ```
+
+5. **Stop and gracefully remove the containers:**
    ```bash
    docker-compose down
    ```
 
-## 🎓 OS Concepts Demonstrated
+---
 
-### 1. Process Management
-- **Process States**: Running, sleeping, zombie processes visible in process monitor
-- **Process Hierarchy**: Parent-child relationships
-- **CPU Utilization**: Real-time CPU percentage per process
-
-### 2. Memory Management
-- **Memory Usage**: Per-process and per-container memory tracking
-- **Resource Limits**: Container memory limits via cgroups
-- **Virtual Memory**: RSS (Resident Set Size) and VSZ (Virtual Size)
-
-### 3. CPU Scheduling
-- **FCFS**: Non-preemptive, simple queue-based scheduling
-- **Round Robin**: Preemptive, time-quantum based scheduling
-- **SJF**: Non-preemptive, shortest burst time first
-- **Metrics**: Waiting time, turnaround time, throughput
-
-### 4. Containerization & Isolation
-- **Namespaces**: PID, Network, Mount, User isolation
-- **Cgroups**: CPU and memory resource limiting
-- **Process Isolation**: Each container has isolated process tree
-
-### 5. System Calls & /proc
-- **System Information**: Reading from /proc filesystem
-- **Process Information**: /proc/[pid]/ directory structure
-- **Real-time Monitoring**: Live system state observation
-
-## 📚 References
-
-1. **Felter, W., et al. (2015)**. "An Updated Performance Comparison of Virtual Machines and Linux Containers" - IEEE ISPASS
-2. **Goel, N., & Garg, R.B. (2013)**. "A Comparative Study of CPU Scheduling Algorithms"
-3. **Linux Kernel Documentation**. "Control Groups (cgroups)"
-4. **Silberschatz, A., et al.** "Operating System Concepts" (10th Edition)
-
-## 👥 Team Members
-
-- **Rakshitha R** - 24BCE1070
-- **Dittya D** - 24BCE5045
-- **P Sai Krishna** - 24BCE5232
-
-## 🎯 Project Highlights
-
-✅ **30% Implementation Complete**
-- ✅ Container resource monitoring with Docker API
-- ✅ Process management dashboard with /proc
-- ✅ CPU scheduler simulator (3 algorithms)
-- ✅ Real-time data visualization
-- ✅ Responsive UI with dark mode
-
-## 🔧 API Endpoints
+## 🔧 API Reference
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/containers/stats` | GET | Container CPU, memory, process stats |
-| `/api/processes` | GET | Top 20 processes by CPU usage |
-| `/api/visit` | GET | Visitor count (increments on call) |
-
-## 🎨 Features
-
-- **Dark Mode** - Toggle between light and dark themes
-- **Real-time Updates** - Auto-refresh every 3-5 seconds
-- **Responsive Design** - Works on desktop and mobile
-- **Interactive Scheduler** - Modify process data and see results instantly
-
-## 📝 License
-
-© 2025 Docker Project | All Rights Reserved
+| `/api/visit` | GET | Increments and retrieves the global visitor count from Redis. |
+| `/api/containers/stats` | GET | Returns real-time CPU, memory, and process stats for running containers using the Docker socket. |
+| `/api/processes` | GET | Returns the top 20 processes ranked by CPU usage monitored through `/proc`. |
 
 ---
 
-**Note**: This project is designed for educational purposes to demonstrate Operating System concepts using modern container technology.
+## 🎓 Educational Value: OS Concepts
+
+This project practically demonstrates abstract OS concepts by grounding them with Docker:
+1. **Containerization & Resource Allocation:** Utilizing Linux `cgroups` (Control Groups) for resource restriction, and namespaces (`pid`, `net`, `mnt`) for process/networking isolation.
+2. **Virtual File Systems:** Interacting directly with Linux's `/proc` pseudo-filesystem to extract real-time system state metrics.
+3. **Scheduling Mechanics:** Visualizing how the OS dispatcher curates runnable tasks with preemptive vs. non-preemptive logic loops.
+4. **Inter-Process Communication (IPC):** Handling asynchronous, non-blocking communication architectures across isolated microservices inside virtual docker bridge-networks.
+
+## 📚 References
+
+1. **Felter, W., et al. (2015)**. _"An Updated Performance Comparison of Virtual Machines and Linux Containers"_ - IEEE ISPASS.
+2. **Goel, N., & Garg, R.B. (2013)**. _"A Comparative Study of CPU Scheduling Algorithms"_.
+3. **Linux Kernel Documentation**. _"Control Groups (cgroups)"_.
+4. **Silberschatz, A., et al.** _"Operating System Concepts" (10th Edition)_.
+
+---
+
+<p align="center">
+  <b>Disclaimer:</b> This project is primarily designed for educational purposes to demonstrate modern Operating System concepts leveraging container mechanisms. © 2025 Docker Project.
+</p>
