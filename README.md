@@ -1,4 +1,4 @@
-# 🐳 Docker OS Project: Container & Process Management System
+# 🐳 Docker Project: Container & Process Management System
 
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
@@ -6,7 +6,7 @@
 ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 
-A comprehensive educational project demonstrating core **Operating System concepts** through the lens of modern Docker containerization. It features real-time container resource monitoring, actual OS process tracking via `/proc`, and an interactive CPU scheduler simulator.
+A comprehensive project demonstrating core **Operating System concepts** through the lens of modern Docker containerization. It features real-time container resource monitoring, actual OS process tracking via `/proc`, and an interactive CPU scheduler simulator.
 
 ---
 
@@ -15,7 +15,6 @@ A comprehensive educational project demonstrating core **Operating System concep
 ### 1. 🐳 Container Resource Monitor
 - **Real-time Metrics:** Tracks CPU, memory usage, and process count per container.
 - **Docker API Integration:** Live updates fetched directly via the Docker Engine API.
-- **OS Concepts:** Linux cgroups, resource isolation, namespace separation.
 
 ### 2. ⚙️ Process Management Dashboard
 - **Live Process Tracking:** Parses the Linux `/proc` filesystem to monitor host and containerized processes.
@@ -29,7 +28,6 @@ A comprehensive educational project demonstrating core **Operating System concep
   - **SJF** (Shortest Job First)
   - **Round Robin** (with configurable time quantum)
 - **Performance Evaluation:** Computes and graphs waiting time, turnaround time, and throughput via Gantt charts.
-- **OS Concepts:** CPU scheduling algorithms, context switching, preemption.
 
 ### 4. 🎨 Modern UI/UX
 - Responsive dashboard design with Dark/Light mode support.
@@ -153,24 +151,3 @@ Ensure you have the following installed on your host machine:
 | `/api/processes` | GET | Returns the top 20 processes ranked by CPU usage monitored through `/proc`. |
 
 ---
-
-## 🎓 Educational Value: OS Concepts
-
-This project practically demonstrates abstract OS concepts by grounding them with Docker:
-1. **Containerization & Resource Allocation:** Utilizing Linux `cgroups` (Control Groups) for resource restriction, and namespaces (`pid`, `net`, `mnt`) for process/networking isolation.
-2. **Virtual File Systems:** Interacting directly with Linux's `/proc` pseudo-filesystem to extract real-time system state metrics.
-3. **Scheduling Mechanics:** Visualizing how the OS dispatcher curates runnable tasks with preemptive vs. non-preemptive logic loops.
-4. **Inter-Process Communication (IPC):** Handling asynchronous, non-blocking communication architectures across isolated microservices inside virtual docker bridge-networks.
-
-## 📚 References
-
-1. **Felter, W., et al. (2015)**. _"An Updated Performance Comparison of Virtual Machines and Linux Containers"_ - IEEE ISPASS.
-2. **Goel, N., & Garg, R.B. (2013)**. _"A Comparative Study of CPU Scheduling Algorithms"_.
-3. **Linux Kernel Documentation**. _"Control Groups (cgroups)"_.
-4. **Silberschatz, A., et al.** _"Operating System Concepts" (10th Edition)_.
-
----
-
-<p align="center">
-  <b>Disclaimer:</b> This project is primarily designed for educational purposes to demonstrate modern Operating System concepts leveraging container mechanisms. © 2025 Docker Project.
-</p>
